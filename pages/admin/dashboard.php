@@ -12,7 +12,7 @@
 
 // Incluir configurações
 require_once '../../config/config.php';
-require_once '../../config/database.php';
+require_once '../../config/db.php';
 require_once '../../includes/functions.php';
 
 // Verificar se usuário está logado e é administrador

@@ -3,7 +3,7 @@
 ./assets/icons/README.md
 ./assets/images/README.md
 ./config/config.php
-./config/database.php
+./config/db.php
 ./css/style.css
 ./db/README.md
 ./estrutura_projeto.txt

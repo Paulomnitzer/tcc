@@ -11,7 +11,7 @@ projeto-tcc/
 │   └── icons/             # Ícones personalizados
 ├── config/                # Configurações do sistema
 │   ├── config.php         # Configurações gerais
-│   └── database.php       # Configuração do banco de dados
+│   └── db.php             # Configuração do banco de dados
 ├── css/                   # Folhas de estilo
 │   └── style.css          # CSS principal customizado
 ├── db/                    # Arquivos do banco de dados
@@ -50,7 +50,7 @@ projeto-tcc/
 
 1. Crie um banco de dados MySQL
 2. Adicione os arquivos SQL na pasta `db/`
-3. Configure as credenciais em `config/database.php`:
+3. Configure as credenciais em `config/db.php`:
    ```php
    define('DB_HOST', 'localhost');
    define('DB_NAME', 'nome_do_seu_banco');
