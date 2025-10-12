@@ -168,6 +168,10 @@ include '../../includes/header.php';
             <input type="text" class="form-control" id="nomeItem" placeholder="Digite o nome">
           </div>
           <div class="mb-3">
+            <label for="descricaoItem" class="form-label">Descrição: </label>
+            <input type="text" class="form-control" id="descricaoItem" placeholder="Digite a descrição: ">
+          </div>
+          <div class="mb-3">
             <label for="quantidadeItem" class="form-label">Quantidade</label>
             <input type="number" class="form-control" id="quantidadeItem" placeholder="0">
           </div>
@@ -176,6 +180,7 @@ include '../../includes/header.php';
             <input type="number" class="form-control" id="precoItem" placeholder="0.00" step="0.01">
           </div>
         </form>
+       
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
