@@ -1,0 +1,112 @@
+# Projeto TCC - .gitignore
+
+# ===== ARQUIVOS DE CONFIGURAÇÃO SENSÍVEIS =====
+config/database.php
+config/config_local.php
+.env
+.env.local
+
+# ===== ARQUIVOS DE SISTEMA =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===== LOGS E CACHE =====
+*.log
+logs/
+cache/
+tmp/
+temp/
+
+# ===== UPLOADS E ARQUIVOS TEMPORÁRIOS =====
+uploads/
+files/
+*.tmp
+*.temp
+
+# ===== DEPENDÊNCIAS E BIBLIOTECAS =====
+vendor/
+node_modules/
+bower_components/
+
+# ===== ARQUIVOS DE BACKUP =====
+*.bak
+*.backup
+*.sql.gz
+backup/
+
+# ===== ARQUIVOS DE IDE =====
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PhpStorm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# NetBeans
+nbproject/
+
+# Eclipse
+.project
+.metadata
+.buildpath
+.settings/
+
+# ===== ARQUIVOS DE SISTEMA OPERACIONAL =====
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Linux
+*~
+.nfs*
+
+# ===== ARQUIVOS DE DESENVOLVIMENTO =====
+# Composer
+composer.phar
+composer.lock
+
+# NPM
+package-lock.json
+yarn.lock
+
+# Sass
+.sass-cache/
+*.css.map
+
+# ===== ARQUIVOS DE TESTE =====
+phpunit.xml
+.phpunit.result.cache
+tests/_output/
+coverage/
+
+# ===== ARQUIVOS DE DOCUMENTAÇÃO TEMPORÁRIOS =====
+*.pdf
+*.doc
+*.docx
+docs/build/
+
+# ===== ARQUIVOS ESPECÍFICOS DO PROJETO =====
+# Adicione aqui arquivos específicos que não devem ser versionados
+# Exemplo:
+# relatorios_gerados/
+# dados_teste/
