@@ -6,7 +6,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <h5><i class="fas fa-graduation-cap me-2"></i><?php echo SITE_NAME; ?></h5>
-                    <p class="mb-0">Sistema desenvolvido para Trabalho de Conclusão de Curso.</p>
+                    <p class="mb-0">Sistema desenvolvido pelo Grupo 3 da turma EUI para o TCC.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p class="mb-0">
