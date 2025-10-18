@@ -20,7 +20,7 @@ if (session_status() == PHP_SESSION_NONE) {
 date_default_timezone_set('America/Sao_Paulo');
 
 // Configurações do sistema
-define('SITE_NAME', 'Sistema TCC');
+define('SITE_NAME', 'Youstockage');
 define('SITE_URL', 'http://localhost/tcc');
 define('SITE_VERSION', '1.0.0');
 

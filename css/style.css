@@ -11,7 +11,7 @@
 
 /* ===== VARIÁVEIS CSS ===== */
 :root {
-    --primary-color: #007bff;
+    --primary-color: #c67d46;
     --secondary-color: #6c757d;
     --success-color: #28a745;
     --danger-color: #dc3545;
@@ -28,7 +28,7 @@
 /* ===== ESTILOS GLOBAIS ===== */
 body {
     font-family: var(--font-family-sans-serif);
-    background-color: #f8f9fa;
+    background-color: #f9ece5;
     line-height: 1.6;
 }
 
@@ -72,12 +72,36 @@ body {
     font-weight: 600;
 }
 
-/* Botões customizados */
-.btn {
-    border-radius: var(--border-radius);
-    font-weight: 500;
-    transition: all 0.3s ease;
+/* Botão principal laranja */
+.btn-primary {
+    background-color: #c67d46;   /* laranja base */
+    border-color: #c67d46;
+    color: white;
 }
+
+.btn-primary:hover {
+    background-color: #b76b3f;  /* laranja mais escuro ao passar o mouse */
+    border-color: #b76b3f;
+}
+
+/* Botão secundário também laranja, mas tom mais claro */
+.btn-secondary {
+    background-color: #832828;  /* laranja claro */
+    border-color: #541919;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #522626;  /* laranja mais escuro ao passar o mouse */
+    border-color: #5b2525;
+}
+
+
+.btn-primary:hover {
+    background-color: #b76b3f; /* laranja mais escuro ao passar o mouse */
+    border-color: #b76b3f;
+}
+
 
 .btn:hover {
     transform: translateY(-1px);
@@ -92,7 +116,7 @@ body {
 
 .form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(252, 166, 104, 0.25);
 }
 
 .form-label {
@@ -251,4 +275,17 @@ footer {
         background-color: white !important;
         color: black !important;
     }
+}
+
+/* ===== LOGO DA PÁGINA INICIAL ===== */
+.empresa-logo {
+    width: 25%;         /* ocupa 25% da largura da tela */
+    max-width: 300px;   /* nunca ultrapassa 300px */
+    height: auto;       /* mantém proporção */
+    border-radius: 12px; /* opcional — deixa cantos arredondados */
+    .text-center img.empresa-logo {
+    display: inline-block;
+    margin: 20px auto;
+}
+
 }
