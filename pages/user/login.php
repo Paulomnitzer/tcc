@@ -1,45 +1,46 @@
 <?php
-/**
- * Página de Login - Usuário
- * 
- * Esta página permite que usuários comuns façam login no sistema.
- * Implemente aqui:
- * - Formulário de login
- * - Validação de credenciais
- * - Redirecionamento após login
- * - Links para recuperação de senha e cadastro
- */
-
-// Incluir configurações
+// Incluir configurações e funções
 require_once '../../config/config.php';
 require_once '../../config/db.php';
 require_once '../../includes/functions.php';
 
+// Iniciar sessão
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
-
-// Definir título da página
-$page_title = 'Login de Usuário';
-
-// Processar formulário de login (implementar lógica aqui)
+// Processar formulário de login
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-$email = $_POST['email'] ?? '';
-$senha = $_POST['senha'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $senha = $_POST['senha'] ?? '';
 
-if($email == "teste@t.com" && $senha == "123"){
-    // Simular criação de sessão
-    $_SESSION['user_id'] = 1; // ID do usuário
-    $_SESSION['user_name'] = "Usuário Teste"; // Nome do usuário
-    $_SESSION['user_email'] = $email; // Email do usuário
-    $_SESSION['user_role'] = 'user'; // Papel do usuário
-    $_SESSION['usuario_logado'] = true; // Marcar como logado
+    if ($email != '' && $senha != '') {
+        // Consulta usando mysqli
+        $stmt = $conn->prepare("SELECT id, nome, email, senha FROM usuarios WHERE email = ? LIMIT 1");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $usuario = $result->fetch_assoc();
+        $stmt->close();
 
-    // Redirecionar para área do usuário
-    header('Location: ../../pages/user/dashboard.php');
-    exit();
-} else if($email != '' || $senha != ''){
-    echo "<script>alert('Credenciais inválidas. Tente novamente.');</script>";
+        if ($usuario && $usuario['senha'] === $senha) { // senha em texto puro
+            session_start();
+            $_SESSION['user_id'] = $usuario['id'];
+            $_SESSION['user_name'] = $usuario['nome'];
+            $_SESSION['user_email'] = $usuario['email'];
+            $_SESSION['user_role'] = 'user';
+            $_SESSION['usuario_logado'] = true;
+
+            header('Location: ../../pages/user/dashboard.php');
+            exit();
+        } else {
+            $erro = 'Credenciais inválidas. Tente novamente.';
+        }
+    } else {
+        $erro = 'Preencha todos os campos.';
+    }
 }
-}
+
 
 // Incluir header
 include '../../includes/header.php';
@@ -53,6 +54,10 @@ include '../../includes/header.php';
                     <h4><i class="fas fa-user me-2"></i>Login de Usuário</h4>
                 </div>
                 <div class="card-body">
+                    <?php if(!empty($erro)): ?>
+                        <div class="alert alert-danger"><?= $erro ?></div>
+                    <?php endif; ?>
+
                     <!-- Formulário de login -->
                     <form method="POST" action="">
                         <div class="mb-3">
