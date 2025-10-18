@@ -1,13 +1,8 @@
 <?php
 /**
- * Dashboard - Usuário
+ * Página de Pesquisa - Produtos
  * 
- * Esta é a página principal após o login do usuário.
- * Implemente aqui:
- * - Informações do usuário
- * - Resumo de atividades
- * - Links para funcionalidades principais
- * - Estatísticas relevantes
+ * Esta página permite pesquisar produtos no sistema.
  */
 
 // Incluir configurações
@@ -20,90 +15,78 @@ if (!usuarioLogado()) {
     redirecionar(SITE_URL . '/pages/user/login.php');
 }
 
-// Buscar produtos do banco de dados
-$produtos = [];
-$total_produtos = 0;
-$produtos_baixo_estoque = 0;
-
-try {
-    $stmt = $conn->prepare('SELECT * FROM produto ORDER BY dt_criado DESC');
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $produtos = $result->fetch_all(MYSQLI_ASSOC);
-    $total_produtos = count($produtos);
-    
-    // Contar produtos com estoque baixo
-    $stmt_estoque = $conn->prepare('SELECT COUNT(*) as total FROM produto WHERE estoque <= limite_min');
-    $stmt_estoque->execute();
-    $result_estoque = $stmt_estoque->get_result();
-    $produtos_baixo_estoque = $result_estoque->fetch_assoc()['total'];
-    
-} catch (Exception $e) {
-    $erro_produtos = "Erro ao carregar produtos: " . $e->getMessage();
-}
-
 // Definir título da página
-$page_title = 'Dashboard do Usuário';
+$page_title = 'Pesquisar Produtos';
+
+// Obter termo de pesquisa
+$termo_pesquisa = sanitizar($_GET['q'] ?? '');
+$resultados = [];
+$total_resultados = 0;
+
+// Buscar produtos se houver termo de pesquisa
+if (!empty($termo_pesquisa)) {
+    try {
+        $stmt = $conn->prepare('
+            SELECT * FROM produto 
+            WHERE nome LIKE ? OR descricao LIKE ? 
+            ORDER BY 
+                CASE 
+                    WHEN nome LIKE ? THEN 1 
+                    WHEN descricao LIKE ? THEN 2 
+                    ELSE 3 
+                END,
+                nome ASC
+        ');
+        
+        $termo_like = "%$termo_pesquisa%";
+        $stmt->bind_param('ssss', $termo_like, $termo_like, $termo_like, $termo_like);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $resultados = $result->fetch_all(MYSQLI_ASSOC);
+        $total_resultados = count($resultados);
+        
+    } catch (Exception $e) {
+        $erro_pesquisa = "Erro ao pesquisar produtos: " . $e->getMessage();
+    }
+}
 
 // Incluir header
 include '../../includes/header.php';
 ?>
 
-<?php
-// Exibir mensagens de sucesso/erro
-if (isset($_SESSION['sucesso'])) {
-    echo '<div class="container mt-4">';
-    echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
-    echo $_SESSION['sucesso'];
-    echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-    echo '</div>';
-    echo '</div>';
-    unset($_SESSION['sucesso']);
-}
-
-if (isset($_SESSION['erros'])) {
-    echo '<div class="container mt-4">';
-    echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
-    echo '<ul class="mb-0">';
-    foreach ($_SESSION['erros'] as $erro) {
-        echo '<li>' . htmlspecialchars($erro) . '</li>';
-    }
-    echo '</ul>';
-    echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-    echo '</div>';
-    echo '</div>';
-    unset($_SESSION['erros']);
-}
-?>
-
 <div class="container mt-4">
-    <!-- Cabeçalho do dashboard -->
+    <!-- Cabeçalho -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h2>
+                    <h2><i class="fas fa-search me-2"></i>Pesquisar Produtos</h2>
                     <p class="text-muted mb-0">
-                        Bem-vindo, <?php echo $_SESSION['usuario_nome'] ?? 'Usuário'; ?>!
+                        Encontre produtos no sistema
                     </p>
                 </div>
                 <div>
-                    <span class="badge bg-success">Online</span>
+                    <a href="dashboard.php" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar ao Dashboard
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Barra de pesquisa -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form action="pesquisar.php" method="GET">
+                    <form method="GET" action="pesquisar.php">
                         <div class="input-group">
-                            <input type="text" class="form-control" name="q" placeholder="Pesquisar itens..." aria-label="Pesquisar itens">
+                            <input type="text" class="form-control" name="q" 
+                                   value="<?php echo htmlspecialchars($termo_pesquisa); ?>" 
+                                   placeholder="Digite o nome ou descrição do produto..." 
+                                   aria-label="Pesquisar produtos">
                             <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-search"></i>
+                                <i class="fas fa-search"></i> Pesquisar
                             </button>
                         </div>
                     </form>
@@ -111,111 +94,63 @@ if (isset($_SESSION['erros'])) {
             </div>
         </div>
     </div>
-    
-    <!-- Cards de estatísticas -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Total de Itens</h5>
-                            <h3 class="mb-0"><?php echo $total_produtos; ?></h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-list fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Em Estoque</h5>
-                            <h3 class="mb-0"><?php echo $total_produtos - $produtos_baixo_estoque; ?></h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-check-circle fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3 mb-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Estoque Baixo</h5>
-                            <h3 class="mb-0"><?php echo $produtos_baixo_estoque; ?></h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-exclamation-triangle fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3 mb-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Este Mês</h5>
-                            <h3 class="mb-0"><?php echo $total_produtos; ?></h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-calendar fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Conteúdo principal -->
+
+    <!-- Resultados -->
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5><i class="fas fa-boxes me-2"></i>Produtos Cadastrados</h5>
-                    <span class="badge bg-primary"><?php echo $total_produtos; ?> itens</span>
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        <?php if (!empty($termo_pesquisa)): ?>
+                            Resultados da pesquisa para "<?php echo htmlspecialchars($termo_pesquisa); ?>"
+                        <?php else: ?>
+                            Resultados da Pesquisa
+                        <?php endif; ?>
+                    </h5>
+                    <?php if (!empty($termo_pesquisa)): ?>
+                        <span class="badge bg-primary"><?php echo $total_resultados; ?> resultado(s)</span>
+                    <?php endif; ?>
                 </div>
                 <div class="card-body">
-                    <?php if (!empty($erro_produtos)): ?>
-                        <div class="alert alert-danger"><?php echo $erro_produtos; ?></div>
-                    <?php elseif (empty($produtos)): ?>
-                        <p class="text-muted">Nenhum produto cadastrado.</p>
+                    <?php if (!empty($erro_pesquisa)): ?>
+                        <div class="alert alert-danger"><?php echo $erro_pesquisa; ?></div>
+                    <?php elseif (empty($termo_pesquisa)): ?>
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-search fa-3x mb-3"></i>
+                            <p>Digite um termo de pesquisa para encontrar produtos.</p>
+                        </div>
+                    <?php elseif (empty($resultados)): ?>
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-search fa-3x mb-3"></i>
+                            <p>Nenhum produto encontrado para "<?php echo htmlspecialchars($termo_pesquisa); ?>".</p>
+                            <p>Tente usar termos diferentes ou verifique a ortografia.</p>
+                        </div>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Nome</th>
+                                        <th>Produto</th>
                                         <th>Preço</th>
                                         <th>Estoque</th>
                                         <th>Limite</th>
+                                        <th>Status</th>
                                         <th>Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($produtos as $produto): ?>
+                                    <?php foreach ($resultados as $produto): ?>
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <?php if (!empty($produto['imagem'])): ?>
                                                         <img src="../../imgs/<?php echo htmlspecialchars($produto['imagem']); ?>" 
                                                              alt="<?php echo htmlspecialchars($produto['nome']); ?>" 
-                                                             class="rounded me-2" width="40" height="40" style="object-fit: cover;">
+                                                             class="rounded me-3" width="50" height="50" style="object-fit: cover;">
                                                     <?php else: ?>
-                                                        <div class="bg-light rounded d-flex align-items-center justify-content-center me-2" 
-                                                             style="width: 40px; height: 40px;">
+                                                        <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" 
+                                                             style="width: 50px; height: 50px;">
                                                             <i class="fas fa-box text-muted"></i>
                                                         </div>
                                                     <?php endif; ?>
@@ -234,6 +169,13 @@ if (isset($_SESSION['erros'])) {
                                                 </span>
                                             </td>
                                             <td><?php echo $produto['limite_min']; ?></td>
+                                            <td>
+                                                <?php if ($produto['estoque'] <= $produto['limite_min']): ?>
+                                                    <span class="badge bg-warning">Estoque Baixo</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-success">Normal</span>
+                                                <?php endif; ?>
+                                            </td>
                                             <td>
                                                 <div class="btn-group btn-group-sm">
                                                     <button type="button" class="btn btn-outline-primary" 
@@ -263,31 +205,10 @@ if (isset($_SESSION['erros'])) {
                 </div>
             </div>
         </div>
-        
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-cog me-2"></i>Ações Rápidas</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="produto.php" class="btn btn-outline-primary">
-                            <i class="fas fa-plus me-2"></i>Novo Item
-                        </a>
-                        <a href="relatorios.php" class="btn btn-outline-info">
-                            <i class="fas fa-file-export me-2"></i>Relatórios
-                        </a>
-                        <a href="editar.php" class="btn btn-outline-warning">
-                            <i class="fas fa-user-edit me-2"></i>Editar Perfil
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
-<!-- Modal Editar Produto -->
+<!-- Modal Editar Produto (mesmo do dashboard) -->
 <div class="modal fade" id="editarProdutoModal" tabindex="-1" aria-labelledby="editarProdutoModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -334,7 +255,7 @@ if (isset($_SESSION['erros'])) {
     </div>
 </div>
 
-<!-- Modal Excluir Produto -->
+<!-- Modal Excluir Produto (mesmo do dashboard) -->
 <div class="modal fade" id="excluirProdutoModal" tabindex="-1" aria-labelledby="excluirProdutoModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

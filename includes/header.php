@@ -25,10 +25,10 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #8a551bff;">
         <div class="container">
-            <a class="navbar-brand" href="<?php echo SITE_URL; ?>">
-                <i class="fas fa-graduation-cap me-2"></i>
-                <?php echo SITE_NAME; ?>
-            </a>
+         <a class="navbar-brand" href="<?php echo SITE_URL; ?>/pages/user/dashboard.php">
+    <i class="fas fa-graduation-cap me-2"></i>
+    <?php echo SITE_NAME; ?>
+        </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
