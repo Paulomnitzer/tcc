@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Se não houver erros, inserir usuário
     if (empty($erros)) {
         // ✅ Senha sem hash (conforme solicitado)
-        $stmt = $conn->prepare('INSERT INTO usuarios (nome, email, telefone, data_nascimento, senha) VALUES (?, ?, ?, ?, ?)');
+        $stmt = $conn->prepare('INSERT INTO usuarios (nome, email, telefone, dt_nascimento, senha) VALUES (?, ?, ?, ?, ?)');
         $stmt->bind_param('sssss', $nome, $email, $telefone, $data_nascimento, $senha);
         
         if ($stmt->execute()) {

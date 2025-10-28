@@ -16,6 +16,7 @@ require_once 'config/config.php';
 // Incluir arquivo de conexão com banco de dados
 require_once 'config/db.php';
 
+
 // Incluir header comum
 include 'includes/header.php';
 

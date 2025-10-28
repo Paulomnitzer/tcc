@@ -1,3 +1,37 @@
+<?php
+// Garantir sessão ativa e tratar logout antes de qualquer saída HTML
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Tratamento seguro de logout via POST (botão com name="sair")
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sair'])) {
+    // Limpar variáveis de sessão
+    $_SESSION = [];
+
+    // Remover cookie de sessão se existia
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params['path'], $params['domain'],
+            $params['secure'], $params['httponly']
+        );
+    }
+
+    // Destruir sessão e redirecionar para a página inicial
+    session_unset();
+    session_destroy();
+
+    // Usar SITE_URL se definido, caso contrário redireciona para /index.php
+    if (defined('SITE_URL')) {
+        header('Location: ' . SITE_URL . '/index.php');
+    } else {
+        header('Location: /index.php');
+    }
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -49,12 +83,18 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user me-1"></i>
-                                <?php echo $_SESSION['usuario_nome'] ?? 'Usuário'; ?>
+                                <?php echo $_SESSION['usuario_nome'] ?? $_SESSION['user_name'] ?? 'Usuário'; ?>
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog me-2"></i>Perfil</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                                <li>
+                                    <form method="post" action="" class="m-0">
+                                        <button type="submit" name="sair" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Sair
+                                        </button>
+                                    </form>
+                                </li>
                             </ul>
                         </li>
                     <?php else: ?>
