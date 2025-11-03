@@ -1,31 +1,54 @@
 <?php
 /**
  * Dashboard Administrativo
- * 
- * Esta é a página principal do painel administrativo.
- * Implemente aqui:
- * - Estatísticas gerais do sistema
- * - Gráficos e relatórios
- * - Links para funcionalidades administrativas
- * - Monitoramento do sistema
  */
-
-// Incluir configurações
 require_once '../../config/config.php';
-require_once '../../config/db.php';
 require_once '../../includes/functions.php';
 
-// Verificar se usuário está logado e é administrador
 if (!usuarioLogado() || !usuarioAdmin()) {
     redirecionar(SITE_URL . '/pages/admin/login.php');
 }
 
-// Definir título da página
+// Conectar ao banco
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db   = "banco";
+
+$conn = new mysqli($host, $user, $pass, $db);
+
+if ($conn->connect_error) {
+    die("Falha na conexão: " . $conn->connect_error);
+}
+
+// Buscar estatísticas do sistema
+try {
+    // Total de usuários
+    $result = $conn->query("SELECT COUNT(*) as total FROM usuarios");
+    $row = $result->fetch_assoc();
+    $totalUsuarios = $row['total'];
+    
+    // Total de produtos
+    $result = $conn->query("SELECT COUNT(*) as total FROM produto");
+    $row = $result->fetch_assoc();
+    $totalProdutos = $row['total'];
+    
+    // Produtos com estoque baixo
+    $result = $conn->query("SELECT COUNT(*) as total FROM produto WHERE estoque <= limite_min");
+    $row = $result->fetch_assoc();
+    $produtosEstoqueBaixo = $row['total'];
+    
+    // Usuários cadastrados este mês
+    $result = $conn->query("SELECT COUNT(*) as total FROM usuarios WHERE MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())");
+    $row = $result->fetch_assoc();
+    $usuariosEsteMes = $row['total'];
+    
+} catch (Exception $e) {
+    $totalUsuarios = $totalProdutos = $produtosEstoqueBaixo = $usuariosEsteMes = 0;
+    error_log("Erro ao buscar estatísticas: " . $e->getMessage());
+}
+
 $page_title = 'Painel Administrativo';
-
-// TODO: Buscar estatísticas do sistema do banco de dados
-
-// Incluir header
 include '../../includes/header.php';
 ?>
 
@@ -55,8 +78,8 @@ include '../../includes/header.php';
                     <div class="d-flex justify-content-between">
                         <div>
                             <h5 class="card-title">Total de Usuários</h5>
-                            <h3 class="mb-0">0</h3>
-                            <small>+0% este mês</small>
+                            <h3 class="mb-0"><?php echo $totalUsuarios; ?></h3>
+                            <small>+<?php echo $usuariosEsteMes; ?> este mês</small>
                         </div>
                         <div class="align-self-center">
                             <i class="fas fa-users fa-2x"></i>
@@ -71,9 +94,9 @@ include '../../includes/header.php';
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h5 class="card-title">Registros Ativos</h5>
-                            <h3 class="mb-0">0</h3>
-                            <small>+0% este mês</small>
+                            <h5 class="card-title">Total de Produtos</h5>
+                            <h3 class="mb-0"><?php echo $totalProdutos; ?></h3>
+                            <small>Registros ativos</small>
                         </div>
                         <div class="align-self-center">
                             <i class="fas fa-database fa-2x"></i>
@@ -88,8 +111,8 @@ include '../../includes/header.php';
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h5 class="card-title">Pendências</h5>
-                            <h3 class="mb-0">0</h3>
+                            <h5 class="card-title">Estoque Baixo</h5>
+                            <h3 class="mb-0"><?php echo $produtosEstoqueBaixo; ?></h3>
                             <small>Requer atenção</small>
                         </div>
                         <div class="align-self-center">
@@ -123,21 +146,35 @@ include '../../includes/header.php';
         <div class="col-lg-8">
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5><i class="fas fa-chart-area me-2"></i>Estatísticas do Sistema</h5>
+                    <h5><i class="fas fa-chart-area me-2"></i>Produtos com Estoque Baixo</h5>
                 </div>
                 <div class="card-body">
-                    <!-- TODO: Implementar gráficos de estatísticas -->
-                    <p class="text-muted">Gráficos de estatísticas serão implementados aqui.</p>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-list me-2"></i>Atividades Recentes</h5>
-                </div>
-                <div class="card-body">
-                    <!-- TODO: Implementar lista de atividades recentes -->
-                    <p class="text-muted">Log de atividades recentes do sistema.</p>
+                    <?php
+                    try {
+                        $result = $conn->query("SELECT nome, estoque, limite_min FROM produto WHERE estoque <= limite_min ORDER BY estoque ASC LIMIT 10");
+                        
+                        if ($result && $result->num_rows > 0) {
+                            echo '<div class="table-responsive">';
+                            echo '<table class="table table-sm">';
+                            echo '<thead><tr><th>Produto</th><th>Estoque Atual</th><th>Limite Mínimo</th><th>Status</th></tr></thead>';
+                            echo '<tbody>';
+                            while ($produto = $result->fetch_assoc()) {
+                                $status = $produto['estoque'] == 0 ? 'bg-danger' : 'bg-warning';
+                                echo '<tr>';
+                                echo '<td>' . htmlspecialchars($produto['nome']) . '</td>';
+                                echo '<td>' . $produto['estoque'] . '</td>';
+                                echo '<td>' . $produto['limite_min'] . '</td>';
+                                echo '<td><span class="badge ' . $status . '">' . ($produto['estoque'] == 0 ? 'Esgotado' : 'Estoque Baixo') . '</span></td>';
+                                echo '</tr>';
+                            }
+                            echo '</tbody></table></div>';
+                        } else {
+                            echo '<p class="text-success"><i class="fas fa-check-circle me-2"></i>Nenhum produto com estoque baixo.</p>';
+                        }
+                    } catch (Exception $e) {
+                        echo '<p class="text-muted">Erro ao carregar dados.</p>';
+                    }
+                    ?>
                 </div>
             </div>
         </div>
@@ -152,17 +189,14 @@ include '../../includes/header.php';
                         <a href="usuarios.php" class="btn btn-outline-primary">
                             <i class="fas fa-users me-2"></i>Gerenciar Usuários
                         </a>
+                        <a href="produtos.php" class="btn btn-outline-success">
+                            <i class="fas fa-box me-2"></i>Gerenciar Produtos
+                        </a>
                         <a href="configuracoes.php" class="btn btn-outline-secondary">
                             <i class="fas fa-cog me-2"></i>Configurações
                         </a>
                         <a href="relatorios.php" class="btn btn-outline-info">
                             <i class="fas fa-chart-bar me-2"></i>Relatórios
-                        </a>
-                        <a href="backup.php" class="btn btn-outline-warning">
-                            <i class="fas fa-download me-2"></i>Backup
-                        </a>
-                        <a href="logs.php" class="btn btn-outline-danger">
-                            <i class="fas fa-file-alt me-2"></i>Logs do Sistema
                         </a>
                     </div>
                 </div>
@@ -187,8 +221,8 @@ include '../../includes/header.php';
                             <td><?php echo PHP_VERSION; ?></td>
                         </tr>
                         <tr>
-                            <td><strong>Último Backup:</strong></td>
-                            <td>Nunca</td>
+                            <td><strong>Banco:</strong></td>
+                            <td>Conectado</td>
                         </tr>
                     </table>
                 </div>
@@ -197,7 +231,8 @@ include '../../includes/header.php';
     </div>
 </div>
 
-<?php
-// Incluir footer
-include '../../includes/footer.php';
+<?php 
+// Fechar conexão
+$conn->close();
+include '../../includes/footer.php'; 
 ?>

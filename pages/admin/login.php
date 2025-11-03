@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $email = $_POST['email'] ?? '';
 $senha = $_POST['senha'] ?? '';
 
-if($email == "admin@admin" && $senha == "ad"){
+if($email == "admin@admin" && $senha == "admin"){
     // Simular criação de sessão
     $_SESSION['user_id'] = 1; // ID do usuário
     $_SESSION['user_name'] = "Usuário Admin Teste"; // Nome do usuário

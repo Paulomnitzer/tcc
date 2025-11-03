@@ -1,80 +1,60 @@
-<?php
-/**
- * Página de Cadastro - Produto
- * 
- * Esta página permite cadastrar novos produtos no sistema.
- * Implemente aqui:
- * - Formulário de cadastro
- * - Validação de dados
- * - Inserção no banco de dados
- * - Confirmação de cadastro
- */
 
-// Incluir configurações
+<?php
 require_once '../../config/config.php';
 require_once '../../config/db.php';
 require_once '../../includes/functions.php';
 
-// Definir título da página
 $page_title = 'Cadastro de Produto';
 
-// Processar formulário de cadastro
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Sanitizar dados
     $nome = sanitizar($_POST['nome'] ?? '');
     $preco = $_POST['preco'] ?? '';
     $descricao = sanitizar($_POST['descricao'] ?? '');
+    $categoria = sanitizar($_POST['categoria'] ?? '');
     $estoque = $_POST['estoque'] ?? '';
     $limite_min = $_POST['limite_min'] ?? '';
     $imagem = '';
 
     $erros = [];
-    
-    // Validações
-    if (empty($nome) || empty($estoque) || empty($limite_min)) {
+
+    if (empty($nome) || empty($estoque) || empty($limite_min) || empty($categoria)) {
         $erros[] = 'Preencha todos os campos obrigatórios.';
     }
-    
+
     if (!empty($preco) && !is_numeric($preco)) {
-        $erros[] = 'Preço deve ser um valor numérico.';
-    }
-    
-    if (!is_numeric($estoque)) {
-        $erros[] = 'Estoque deve ser um valor numérico.';
-    }
-    
-    if (!is_numeric($limite_min)) {
-        $erros[] = 'Limite mínimo deve ser um valor numérico.';
+        $erros[] = 'Preço deve ser numérico.';
     }
 
-    // Processar upload da imagem
+    if (!is_numeric($estoque)) {
+        $erros[] = 'Estoque deve ser numérico.';
+    }
+
+    if (!is_numeric($limite_min)) {
+        $erros[] = 'Limite mínimo deve ser numérico.';
+    }
+
+    // Upload da imagem
     if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
         $arquivo = $_FILES['imagem'];
-        $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
-        $extensoesPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-        
-        // Verificar extensão
-        if (!in_array($extensao, $extensoesPermitidas)) {
+        $ext = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
+        $permitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+        if (!in_array($ext, $permitidas)) {
             $erros[] = 'Apenas imagens JPG, JPEG, PNG, GIF e WEBP são permitidas.';
         }
-        
-        // Verificar tamanho (1MB = 1048576 bytes)
+
         if ($arquivo['size'] > 1048576) {
             $erros[] = 'A imagem deve ter no máximo 1MB.';
         }
-        
+
         if (empty($erros)) {
-            // Criar diretório se não existir
-            $diretorio = '../../imgs/';
-            if (!is_dir($diretorio)) {
-                mkdir($diretorio, 0755, true);
-            }
-            
-            // Gerar nome único para a imagem
-            $nomeArquivo = uniqid() . '_' . time() . '.' . $extensao;
-            $caminhoCompleto = $diretorio . $nomeArquivo;
-            
-            if (move_uploaded_file($arquivo['tmp_name'], $caminhoCompleto)) {
+            $dir = '../../imgs/';
+            if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+            $nomeArquivo = uniqid() . '_' . time() . '.' . $ext;
+            $destino = $dir . $nomeArquivo;
+
+            if (move_uploaded_file($arquivo['tmp_name'], $destino)) {
                 $imagem = $nomeArquivo;
             } else {
                 $erros[] = 'Erro ao fazer upload da imagem.';
@@ -84,28 +64,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $erros[] = 'Erro no upload da imagem: ' . obterMensagemErroUpload($_FILES['imagem']['error']);
     }
 
-    // Verificar se produto já existe (opcional)
+    // Verificar produto duplicado
     if (empty($erros)) {
         $stmt = $conn->prepare('SELECT id FROM produto WHERE nome = ?');
         $stmt->bind_param('s', $nome);
         $stmt->execute();
         $stmt->store_result();
-        
+
         if ($stmt->num_rows > 0) {
             $erros[] = 'Já existe um produto com este nome.';
         }
         $stmt->close();
     }
 
-    // Se não houver erros, inserir produto
+    // Inserir produto
     if (empty($erros)) {
-        $stmt = $conn->prepare('INSERT INTO produto (nome, preco, descricao, estoque, limite_min, imagem) VALUES (?, ?, ?, ?, ?, ?)');
-        $stmt->bind_param('sdsiis', $nome, $preco, $descricao, $estoque, $limite_min, $imagem);
-        
+        $stmt = $conn->prepare('INSERT INTO produto (nome, preco, descricao, categoria, estoque, limite_min, imagem) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        $stmt->bind_param('sdssiis', $nome, $preco, $descricao, $categoria, $estoque, $limite_min, $imagem);
+
         if ($stmt->execute()) {
             $sucesso = 'Produto cadastrado com sucesso!';
-            // Limpar formulário após sucesso
-            $nome = $preco = $descricao = $estoque = $limite_min = '';
+            $nome = $preco = $descricao = $categoria = $estoque = $limite_min = $imagem = '';
         } else {
             $erros[] = 'Erro ao cadastrar produto: ' . $stmt->error;
         }
@@ -183,6 +162,13 @@ include '../../includes/header.php';
                             <div class="col-12 mb-3">
                                 <label for="descricao" class="form-label">Descrição:</label>
                                 <textarea class="form-control" id="descricao" name="descricao" rows="3" 
+                                          placeholder="Descrição do produto"><?php echo htmlspecialchars($descricao ?? ''); ?></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="descricao" class="form-label">Categoria:</label>
+                                <textarea class="form-control" id="categoria" name="categoria" rows="3" 
                                           placeholder="Descrição do produto"><?php echo htmlspecialchars($descricao ?? ''); ?></textarea>
                             </div>
                         </div>
