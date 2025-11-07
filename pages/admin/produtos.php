@@ -8,7 +8,7 @@ if (!usuarioLogado() || !usuarioAdmin()) {
 }
 
 $page_title = 'Gerenciar Produtos';
-include '../../includes/header.php';
+include '../../includes/headerAdm.php';
 
 // Processar operações CRUD
 $mensagem = '';

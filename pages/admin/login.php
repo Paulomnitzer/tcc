@@ -88,12 +88,10 @@ include '../../includes/header.php';
                     
                     <hr>
                     
-                    <!-- Links adicionais -->
+                    <!-- Links adicionaissss-->
                     <div class="text-center">
                         <p class="mb-2">
-                            <a href="esqueci_senha.php" class="text-decoration-none text-danger">
-                                <i class="fas fa-key me-1"></i>Recuperar acesso
-                            </a>
+
                         </p>
                         <p class="mb-0">
                             <a href="../../index.php" class="text-decoration-none">

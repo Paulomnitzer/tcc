@@ -19,7 +19,7 @@ if ($conn->connect_error) {
 }
 
 $page_title = 'Gerenciar Usuários';
-include '../../includes/header.php';
+include '../../includes/headerAdm.php';
 
 // Processar operações CRUD
 $mensagem = '';

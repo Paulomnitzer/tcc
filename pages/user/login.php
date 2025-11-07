@@ -86,9 +86,7 @@ include '../../includes/header.php';
                     <!-- Links adicionais -->
                     <div class="text-center">
                         <p class="mb-2">
-                            <a href="esqueci_senha.php" class="text-decoration-none">
-                                <i class="fas fa-key me-1"></i>Esqueci minha senha
-                            </a>
+
                         </p>
                         <p class="mb-0">
                             Não tem conta? 

@@ -104,14 +104,7 @@ include '../../includes/header.php';
                         Visualize estatísticas e relatórios do sistema
                     </p>
                 </div>
-                <div class="btn-group">
-                    <button class="btn btn-outline-primary" onclick="window.print()">
-                        <i class="fas fa-print me-2"></i>Imprimir
-                    </button>
-                    <button class="btn btn-outline-success" id="btnExportarPDF">
-                        <i class="fas fa-file-pdf me-2"></i>Exportar PDF
-                    </button>
-                </div>
+
             </div>
         </div>
     </div>

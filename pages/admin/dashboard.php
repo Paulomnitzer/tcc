@@ -49,7 +49,7 @@ try {
 }
 
 $page_title = 'Painel Administrativo';
-include '../../includes/header.php';
+include '../../includes/headerAdm.php';
 ?>
 
 <div class="container-fluid mt-4">

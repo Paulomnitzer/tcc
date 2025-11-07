@@ -254,9 +254,6 @@ include '../../includes/header.php';
                         <a href="relatorios.php" class="btn btn-outline-info">
                             <i class="fas fa-file-export me-2"></i>Relatórios
                         </a>
-                        <a href="editar.php" class="btn btn-outline-warning">
-                            <i class="fas fa-user-edit me-2"></i>Editar Perfil
-                        </a>
                     </div>
                 </div>
             </div>
