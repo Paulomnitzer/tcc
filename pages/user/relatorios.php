@@ -33,23 +33,23 @@ $categorias_count = [];
 $produtos_mais_vendidos = [];
 
 try {
-    // Total de produtos
-    $result = $conn->query("SELECT COUNT(*) as total FROM produto");
+    // Total de produtos (somente ativos)
+    $result = $conn->query("SELECT COUNT(*) as total FROM produto WHERE ativo = 1");
     $total_produtos = $result->fetch_assoc()['total'];
 
-    // Produtos com estoque baixo
-    $result = $conn->query("SELECT COUNT(*) as total FROM produto WHERE estoque <= limite_min AND estoque > 0");
+    // Produtos com estoque baixo (somente ativos)
+    $result = $conn->query("SELECT COUNT(*) as total FROM produto WHERE estoque <= limite_min AND estoque > 0 AND ativo = 1");
     $produtos_baixo_estoque = $result->fetch_assoc()['total'];
 
-    // Produtos sem estoque
-    $result = $conn->query("SELECT COUNT(*) as total FROM produto WHERE estoque = 0");
+    // Produtos sem estoque (somente ativos)
+    $result = $conn->query("SELECT COUNT(*) as total FROM produto WHERE estoque = 0 AND ativo = 1");
     $produtos_sem_estoque = $result->fetch_assoc()['total'];
 
     // Produtos por categoria (se houver tabela de categorias)
     $result = $conn->query("
         SELECT categoria, COUNT(*) as total 
         FROM produto 
-        WHERE categoria IS NOT NULL AND categoria != '' 
+        WHERE categoria IS NOT NULL AND categoria != '' AND ativo = 1
         GROUP BY categoria 
         ORDER BY total DESC 
         LIMIT 10
@@ -62,6 +62,7 @@ try {
     $result = $conn->query("
         SELECT nome, estoque, preco 
         FROM produto 
+        WHERE ativo = 1
         ORDER BY estoque DESC 
         LIMIT 5
     ");
@@ -76,7 +77,7 @@ try {
             COUNT(*) as total_produtos,
             SUM(CASE WHEN estoque <= limite_min THEN 1 ELSE 0 END) as estoque_baixo
         FROM produto 
-        WHERE dt_criado >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        WHERE dt_criado >= DATE_SUB(NOW(), INTERVAL 6 MONTH) AND ativo = 1
         GROUP BY DATE_FORMAT(dt_criado, '%Y-%m')
         ORDER BY mes DESC
     ");
@@ -384,7 +385,7 @@ include '../../includes/header.php';
                     $result = $conn->query("
                         SELECT nome, estoque, limite_min, preco 
                         FROM produto 
-                        WHERE estoque <= limite_min 
+                        WHERE estoque <= limite_min AND ativo = 1
                         ORDER BY estoque ASC 
                         LIMIT 10
                     ");

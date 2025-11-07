@@ -22,27 +22,40 @@ include 'includes/header.php';
 
 ?>
 
-<main class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="jumbotron text-center"> <!-- centraliza tudo -->
-                
-                <h1 class="display-4">Bem-vindo ao Youstockage</h1>
-                
-                <div class="mt-4">
-                    <img src="<?php echo SITE_URL; ?>/assets/images/youstockageindex.png" 
-                        alt="Logo da Empresa Youstockage" 
-                        class="img-fluid empresa-logo">
-                </div>
-                
-                <p class="lead mt-3">Página Inicial</p>
-                <hr class="my-4">
-                <p>Use os links abaixo para navegar pelo sistema:</p>
-                
-                <!-- Links de navegação -->
-                <div class="btn-group mt-2" role="group">
-                    <a class="btn btn-primary btn-lg" href="pages/user/login.php" role="button">Área do Usuário</a>
-                    <a class="btn btn-secondary btn-lg" href="pages/admin/login.php" role="button">Área Administrativa</a>
+<main class="container py-4" style="background: linear-gradient(180deg, #ffffff 0%, #f7f7f7 100%);">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0 rounded">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-3">
+                        <img src="<?php echo SITE_URL; ?>/assets/images/youstockageindex.png" 
+                            alt="Logo da Empresa Youstockage" 
+                            class="img-fluid empresa-logo"
+                            style="max-width: 150px;">
+                    </div>
+
+                    <h1 class="h2 fw-bold mb-2" style="color: #2c3e50;">Bem-vindo ao Youstockage</h1>
+
+                    <p class="small text-muted mb-3">Sistema de Gestão de Estoque Inteligente</p>
+
+                    <div class="row justify-content-center">
+                        <div class="col-10">
+                            <div class="d-grid gap-2">
+                                <a class="btn btn-primary btn-md py-2" href="pages/user/login.php">
+                                    <i class="fas fa-user me-2"></i>Área do Usuário
+                                </a>
+                                <a class="btn btn-outline-secondary btn-md py-2" href="pages/admin/login.php">
+                                    <i class="fas fa-lock me-2"></i>Área Administrativa
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <p class="text-muted small mb-0">
+                            © 2025 Youstockage
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

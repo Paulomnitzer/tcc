@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sair'])) {
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #8a551bff;">
         <div class="container">
          <a class="navbar-brand" href="<?php echo SITE_URL; ?>/pages/admin/dashboard.php">
-    <i class="fas fa-graduation-cap me-2"></i>
+
     <?php echo SITE_NAME; ?>
         </a>
             

@@ -26,14 +26,16 @@ $total_produtos = 0;
 $produtos_baixo_estoque = 0;
 
 try {
-    $stmt = $conn->prepare('SELECT * FROM produto ORDER BY dt_criado DESC');
+    // Buscar somente produtos ativos
+    $stmt = $conn->prepare('SELECT * FROM produto WHERE ativo = 1 ORDER BY dt_criado DESC');
     $stmt->execute();
     $result = $stmt->get_result();
     $produtos = $result->fetch_all(MYSQLI_ASSOC);
     $total_produtos = count($produtos);
     
     // Contar produtos com estoque baixo
-    $stmt_estoque = $conn->prepare('SELECT COUNT(*) as total FROM produto WHERE estoque <= limite_min');
+    // Contar produtos com estoque baixo (somente ativos)
+    $stmt_estoque = $conn->prepare('SELECT COUNT(*) as total FROM produto WHERE estoque <= limite_min AND ativo = 1');
     $stmt_estoque->execute();
     $result_estoque = $stmt_estoque->get_result();
     $produtos_baixo_estoque = $result_estoque->fetch_assoc()['total'];
