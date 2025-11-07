@@ -27,8 +27,7 @@ $total_resultados = 0;
 if (!empty($termo_pesquisa)) {
     try {
         // Buscar somente produtos ativos
-        $stmt = $conn->prepare(''
-            SELECT * FROM produto 
+        $sql = "SELECT * FROM produto 
             WHERE (nome LIKE ? OR descricao LIKE ?) AND ativo = 1
             ORDER BY 
                 CASE 
@@ -36,8 +35,8 @@ if (!empty($termo_pesquisa)) {
                     WHEN descricao LIKE ? THEN 2 
                     ELSE 3 
                 END,
-                nome ASC
-        '');
+                nome ASC";
+        $stmt = $conn->prepare($sql);
         
         $termo_like = "%$termo_pesquisa%";
         $stmt->bind_param('ssss', $termo_like, $termo_like, $termo_like, $termo_like);
