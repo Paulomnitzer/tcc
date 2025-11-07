@@ -18,6 +18,7 @@ try {
         descricao TEXT,
         categoria TEXT,
         preco DECIMAL(10,2) NOT NULL,
+        ativo BOOLEAN DEFAULT TRUE,
         estoque INT NOT NULL,
         limite_min INT NOT NULL,
         imagem VARCHAR(255),

@@ -122,6 +122,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mensagem = 'Você não pode deletar seu próprio usuário!';
         $tipoMensagem = 'danger';
     }
+} elseif (isset($_GET['toggle_status'])) {
+    // Alternar status ativo/inativo
+    try {
+        $usuario_id = $_GET['toggle_status'];
+        
+        // Não permitir desativar o próprio usuário
+        if ($usuario_id == $_SESSION['usuario_id']) {
+            $mensagem = 'Você não pode desativar seu próprio usuário!';
+            $tipoMensagem = 'danger';
+        } else {
+            // Buscar status atual
+            $stmt = $conn->prepare("SELECT ativo FROM usuarios WHERE id = ?");
+            $stmt->bind_param("i", $usuario_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                $usuario = $result->fetch_assoc();
+                $novo_status = $usuario['ativo'] ? 0 : 1;
+                
+                // Atualizar status
+                $stmt = $conn->prepare("UPDATE usuarios SET ativo = ? WHERE id = ?");
+                $stmt->bind_param("ii", $novo_status, $usuario_id);
+                $stmt->execute();
+                
+                $status_text = $novo_status ? 'ativado' : 'inativado';
+                $mensagem = "Usuário {$status_text} com sucesso!";
+                $tipoMensagem = 'success';
+            } else {
+                $mensagem = 'Usuário não encontrado!';
+                $tipoMensagem = 'danger';
+            }
+            $stmt->close();
+        }
+    } catch (Exception $e) {
+        $mensagem = 'Erro ao alterar status do usuário: ' . $e->getMessage();
+        $tipoMensagem = 'danger';
+    }
 }
 
 // Buscar usuários com paginação
@@ -147,6 +185,12 @@ if (isset($_GET['tipo']) && !empty($_GET['tipo'])) {
     $whereConditions[] = "tipo = ?";
     $params[] = $_GET['tipo'];
     $types .= 's';
+}
+
+if (isset($_GET['status']) && $_GET['status'] !== '') {
+    $whereConditions[] = "ativo = ?";
+    $params[] = $_GET['status'];
+    $types .= 'i';
 }
 
 // Ordenação
@@ -185,7 +229,7 @@ try {
     $totalPaginas = ceil($totalUsuarios / $limite);
 
     // Buscar usuários
-    $sql = "SELECT id, nome, email, telefone, dt_nascimento, tipo, created_at 
+    $sql = "SELECT id, nome, email, telefone, dt_nascimento, tipo, ativo, created_at 
             FROM usuarios 
             $whereSQL 
             ORDER BY $orderBy 
@@ -221,7 +265,7 @@ try {
 $usuarioEdicao = null;
 if (isset($_GET['editar'])) {
     try {
-        $stmt = $conn->prepare("SELECT id, nome, email, telefone, dt_nascimento, tipo FROM usuarios WHERE id=?");
+        $stmt = $conn->prepare("SELECT id, nome, email, telefone, dt_nascimento, tipo, ativo FROM usuarios WHERE id=?");
         $stmt->bind_param("i", $_GET['editar']);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -255,6 +299,14 @@ if (isset($_GET['editar'])) {
 
 .table-hover tbody tr:hover {
     background-color: rgba(0, 0, 0, 0.075);
+}
+
+.status-ativo {
+    color: #198754;
+}
+
+.status-inativo {
+    color: #dc3545;
 }
 
 @media (max-width: 768px) {
@@ -294,13 +346,13 @@ if (isset($_GET['editar'])) {
             <div class="card mb-4">
                 <div class="card-body">
                     <form method="GET" class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="busca" class="form-label">Buscar</label>
                             <input type="text" class="form-control" id="busca" name="busca" 
                                    value="<?php echo isset($_GET['busca']) ? htmlspecialchars($_GET['busca']) : ''; ?>" 
                                    placeholder="Nome ou email...">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="tipo" class="form-label">Tipo</label>
                             <select class="form-control" id="tipo" name="tipo">
                                 <option value="">Todos</option>
@@ -308,7 +360,15 @@ if (isset($_GET['editar'])) {
                                 <option value="admin" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'admin') ? 'selected' : ''; ?>>Administrador</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-control" id="status" name="status">
+                                <option value="">Todos</option>
+                                <option value="1" <?php echo (isset($_GET['status']) && $_GET['status'] == '1') ? 'selected' : ''; ?>>Ativo</option>
+                                <option value="0" <?php echo (isset($_GET['status']) && $_GET['status'] == '0') ? 'selected' : ''; ?>>Inativo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
                             <label for="ordenar" class="form-label">Ordenar por</label>
                             <select class="form-control" id="ordenar" name="ordenar">
                                 <option value="novos" <?php echo (isset($_GET['ordenar']) && $_GET['ordenar'] == 'novos') ? 'selected' : ''; ?>>Mais Recentes</option>
@@ -316,7 +376,7 @@ if (isset($_GET['editar'])) {
                                 <option value="nome" <?php echo (isset($_GET['ordenar']) && $_GET['ordenar'] == 'nome') ? 'selected' : ''; ?>>Nome A-Z</option>
                             </select>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
+                        <div class="col-md-3 d-flex align-items-end">
                             <button type="submit" class="btn btn-outline-primary w-100 me-2">
                                 <i class="fas fa-search me-2"></i>Filtrar
                             </button>
@@ -344,6 +404,7 @@ if (isset($_GET['editar'])) {
                                         <th>Telefone</th>
                                         <th>Data Nasc.</th>
                                         <th>Tipo</th>
+                                        <th>Status</th>
                                         <th>Cadastrado em</th>
                                         <th>Ações</th>
                                     </tr>
@@ -361,15 +422,20 @@ if (isset($_GET['editar'])) {
                                                     <?php echo ucfirst($usuario['tipo']); ?>
                                                 </span>
                                             </td>
+                                            <td>
+                                                <span class="badge <?php echo $usuario['ativo'] ? 'bg-success' : 'bg-secondary'; ?>">
+                                                    <?php echo $usuario['ativo'] ? 'Ativo' : 'Inativo'; ?>
+                                                </span>
+                                            </td>
                                             <td><?php echo date('d/m/Y H:i', strtotime($usuario['created_at'])); ?></td>
                                             <td>
                                                 <div class="btn-group btn-group-sm">
-                                                    <a href="?editar=<?php echo $usuario['id']; ?>" 
-                                                       class="btn btn-warning" 
-                                                       data-bs-toggle="modal" 
-                                                       data-bs-target="#modalUsuario"
-                                                       title="Editar usuário">
-                                                        <i class="fas fa-edit"></i>
+
+                                                    <a href="?toggle_status=<?php echo $usuario['id']; ?>" 
+                                                       class="btn <?php echo $usuario['ativo'] ? 'btn-secondary' : 'btn-success'; ?>"
+                                                       title="<?php echo $usuario['ativo'] ? 'Inativar usuário' : 'Ativar usuário'; ?>"
+                                                       onclick="return confirm('Tem certeza que deseja <?php echo $usuario['ativo'] ? 'inativar' : 'ativar'; ?> o usuário <?php echo htmlspecialchars($usuario['nome']); ?>?')">
+                                                        <i class="fas <?php echo $usuario['ativo'] ? 'fa-eye-slash' : 'fa-eye'; ?>"></i>
                                                     </a>
                                                     <?php if ($usuario['id']): ?>
                                                         <a href="?deletar=<?php echo $usuario['id']; ?>" 
@@ -542,6 +608,21 @@ if (isset($_GET['editar'])) {
                     </div>
 
                     <?php if ($usuarioEdicao): ?>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <div>
+                                        <span class="badge <?php echo $usuarioEdicao['ativo'] ? 'bg-success' : 'bg-secondary'; ?>">
+                                            <?php echo $usuarioEdicao['ativo'] ? 'Ativo' : 'Inativo'; ?>
+                                        </span>
+                                    </div>
+                                    <div class="form-text">
+                                        Para alterar o status, use o botão de ativar/inativar na lista
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="alert alert-info">
                             <small>
                                 <i class="fas fa-info-circle me-2"></i>

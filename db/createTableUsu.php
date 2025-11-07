@@ -16,6 +16,7 @@ try {
     telefone VARCHAR(20),
     dt_nascimento VARCHAR(10),
     senha VARCHAR(255) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
     tipo ENUM('user', 'admin') DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

@@ -50,30 +50,7 @@ include '../../includes/header.php';
 ?>
 
 <?php
-// Exibir mensagens de sucesso/erro
-if (isset($_SESSION['sucesso'])) {
-    echo '<div class="container mt-4">';
-    echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
-    echo $_SESSION['sucesso'];
-    echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-    echo '</div>';
-    echo '</div>';
-    unset($_SESSION['sucesso']);
-}
-
-if (isset($_SESSION['erros'])) {
-    echo '<div class="container mt-4">';
-    echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
-    echo '<ul class="mb-0">';
-    foreach ($_SESSION['erros'] as $erro) {
-        echo '<li>' . htmlspecialchars($erro) . '</li>';
-    }
-    echo '</ul>';
-    echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-    echo '</div>';
-    echo '</div>';
-    unset($_SESSION['erros']);
-}
+// Mensagens agora são exibidas via modal no footer (evitar imprimir alerts aqui)
 ?>
 
 <div class="container mt-4">
@@ -84,7 +61,7 @@ if (isset($_SESSION['erros'])) {
                 <div>
                     <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h2>
                     <p class="text-muted mb-0">
-                        Bem-vindo, <?php echo $_SESSION['usuario_nome'] ?? 'Usuário'; ?>!
+                        Bem-vindo, <?php echo $_SESSION['usuario_nome'] ?? $_SESSION['user_name'] ?? 'Usuário'; ?>!
                     </p>
                 </div>
                 <div>

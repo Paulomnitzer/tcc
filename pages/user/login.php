@@ -24,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->close();
 
         if ($usuario && $usuario['senha'] === $senha) { // senha em texto puro
-            session_start();
             $_SESSION['user_id'] = $usuario['id'];
             $_SESSION['user_name'] = $usuario['nome'];
             $_SESSION['user_email'] = $usuario['email'];

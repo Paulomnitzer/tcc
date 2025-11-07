@@ -60,7 +60,7 @@ include '../../includes/header.php';
                 <div>
                     <h2><i class="fas fa-cogs me-2"></i>Painel Administrativo</h2>
                     <p class="text-muted mb-0">
-                        Bem-vindo, <?php echo $_SESSION['usuario_nome'] ?? 'Administrador'; ?>!
+                        Bem-vindo, <?php echo $_SESSION['usuario_nome'] ?? $_SESSION['user_name'] ?? 'Administrador'; ?>!
                     </p>
                 </div>
                 <div>
@@ -192,12 +192,6 @@ include '../../includes/header.php';
                         <a href="produtos.php" class="btn btn-outline-success">
                             <i class="fas fa-box me-2"></i>Gerenciar Produtos
                         </a>
-                        <a href="configuracoes.php" class="btn btn-outline-secondary">
-                            <i class="fas fa-cog me-2"></i>Configurações
-                        </a>
-                        <a href="relatorios.php" class="btn btn-outline-info">
-                            <i class="fas fa-chart-bar me-2"></i>Relatórios
-                        </a>
                     </div>
                 </div>
             </div>
@@ -213,16 +207,8 @@ include '../../includes/header.php';
                             <td><?php echo SITE_VERSION; ?></td>
                         </tr>
                         <tr>
-                            <td><strong>Ambiente:</strong></td>
-                            <td><?php echo ENVIRONMENT; ?></td>
-                        </tr>
-                        <tr>
                             <td><strong>PHP:</strong></td>
                             <td><?php echo PHP_VERSION; ?></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Banco:</strong></td>
-                            <td>Conectado</td>
                         </tr>
                     </table>
                 </div>
